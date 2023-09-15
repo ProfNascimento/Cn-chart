@@ -66,15 +66,15 @@ plot(dMvdc(as.matrix(cbind(1/c(water1[,1],water2[,1]),1/sqrt(c(water1[,2],water2
 abline(v=30.5,lty=2);text(15,20, "PHASE I");text(45,20, "PHASE II")
 
 # PLOT MARGINALS
-plot(dnorm(1/c(water1[,1],water2[,1]),mean = s1$estimate[1], sd = s1$estimate[2]),type="b",ylim=c(0,25), 
+plot(1/c(water1[,1],water2[,1]),type="b", 
      ylab=paste0("Normal(",round(s1$estimate[1],2),",",round(s1$estimate[2],2),") Density" ))
-abline(h=pnorm(0.95,mean = s1$estimate[1], sd = s1$estimate[2]),col="red")
-abline(v=30.5,lty=2);text(15,25, "PHASE I");text(45,25, "PHASE II")
+abline(h=qnorm(0.95,mean = s1$estimate[1], sd = s1$estimate[2]),col="red")
+abline(v=30.5,lty=2);text(15,0.185, "PHASE I");text(45,0.185, "PHASE II")
 
-plot(dlogis(1/sqrt(c(water1[,2],water2[,2])),location = s2$estimate[1], scale = s2$estimate[2]),type="b", ylim=c(0,0.6),
+plot(1/sqrt(c(water1[,2],water2[,2])),type="b",
      ylab=paste0("Logistic(",round(s2$estimate[1],2),",",round(s2$estimate[2],2),") Density" ))
-abline(h=plogis(0.95,location = s2$estimate[1], scale = s2$estimate[2]),col="red")
-abline(v=30.5,lty=2);text(15,0.6, "PHASE I");text(45,0.6, "PHASE II")
+abline(h=qlogis(0.95,location = s2$estimate[1], scale = s2$estimate[2]),col="red")
+abline(v=30.5,lty=2);text(5,10, "PHASE I");text(35,10, "PHASE II")
 #-----------------------------------------------------------#
 ## Build the bivariate distribution (with conditional mean)
 ## (PART II)
@@ -134,8 +134,8 @@ car::qqPlot(c(residuals(fit2_lm),res2))
 plot(c(water1[,4],water2[,4]),type="b")
 
 # MARGINAL PO4
-plot(dlogis(c(water1[,2],water2[,2]),location = s12$estimate[1], scale = s12$estimate[2]),type="b",ylim=c(0,10),
+plot(c(water1[,2],water2[,2]),type="b",
      ylab=paste0("Logistic(",round(s12$estimate[1],2),",",round(s12$estimate[2],2),") Density" ))
-abline(h=plogis(0.95,location = s12$estimate[1], scale = s12$estimate[2]),col="red")
-abline(v=30.5,lty=2);text(15,10, "PHASE I");text(45,10, "PHASE II")
+abline(h=qlogis(0.95,location = s12$estimate[1], scale = s12$estimate[2]),col="red")
+abline(v=30.5,lty=2);text(15,0.255, "PHASE I");text(45,0.255, "PHASE II")
 
