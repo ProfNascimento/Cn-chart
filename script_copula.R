@@ -9,6 +9,62 @@ require(MSQC);data("water1");data("water2")
 summary(1/water1[,1]);sd(1/water1[,1])
 summary(1/sqrt(water1[,2]));sd(1/sqrt(water1[,2]))
 
+##---VISUAL DATAMINING---##
+## PLOT 1/pH
+df <- data.frame(1/water1[,1]);colnames(df)=c("x")
+plt1 = ggplot(df, aes(x = x)) + 
+  geom_histogram(aes(y = ..density..),bins=5,
+                 colour = 1, fill = "white") +
+  geom_density(lwd = 1, colour = 4,
+               fill = 4, alpha = 0.25) + xlab("1/pH") +
+  theme(axis.title.x = element_text(size = 14),
+        axis.text.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14))
+
+plt2 = ggplot(df,aes(x="", y = x)) +
+  geom_boxplot(fill = "lightblue", color = "black") + 
+  coord_flip() + ylab("")+
+  theme_classic() +
+  xlab("") +
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.x = element_text(size = 14))
+
+F1=cowplot::plot_grid(plt1, plt2,labels = c("a.1","a.2"),
+                      ncol = 1, rel_heights = c(2, 1),
+                      align = 'v', axis = 'lr')  
+
+## PLOT 1/sqrt(PO4)
+df2 <- data.frame(1/sqrt(water1[,2]));colnames(df2)=c("x")
+plt12 = ggplot(df2, aes(x = x)) + 
+  geom_histogram(aes(y = ..density..),bins=7,
+                 colour = 1, fill = "white") +
+  geom_density(lwd = 1, colour = "tomato",
+               fill = "tomato", alpha = 0.25) + xlab(expression(1/sqrt(PO4))) +
+  theme(axis.title.x = element_text(size = 14),
+        axis.text.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14))
+
+plt22 = ggplot(df2,aes(x="", y = x)) +
+  geom_boxplot(fill = "tomato", color = "black") + 
+  coord_flip() + ylab("") +
+  theme_classic() +
+  xlab("") +
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.x = element_text(size = 14))
+
+F3=cowplot::plot_grid(plt12, plt22,labels = c("b.1","b.2"),
+                      ncol = 1, rel_heights = c(2, 1),
+                      align = 'v', axis = 'lr')  
+## QQPLOTs
+plt3=ufs::ggqq(df$x)
+plt4=ufs::ggqq(df2$x)
+F2=cowplot::plot_grid(plt3, plt4, scale = c(1,0.96),labels = c("a.3","b.3"),nrow=2) 
+
+cowplot::plot_grid(F1,F2,F3, ncol=3,rel_widths = c(2,1, 2)) 
+##-----------------------##
+
 shapiro.test(1/water1[,1])
 shapiro.test(1/sqrt(water1[,2]))
 mvnormtest::mshapiro.test(t(cbind(1/water1[,1],1/sqrt(water1[,2]))))
@@ -66,13 +122,13 @@ plot(dMvdc(as.matrix(cbind(1/c(water1[,1],water2[,1]),1/sqrt(c(water1[,2],water2
 abline(v=30.5,lty=2);text(15,20, "PHASE I");text(45,20, "PHASE II")
 
 # PLOT MARGINALS
-plot(1/c(water1[,1],water2[,1]),type="b", 
-     ylab=paste0("Normal(",round(s1$estimate[1],2),",",round(s1$estimate[2],2),") Density" ))
+plot(1/c(water1[,1],water2[,1]),type="b", ylab="1/pH (level)")
+     #ylab=paste0("Normal(",round(s1$estimate[1],2),",",round(s1$estimate[2],2),") Density" ))
 abline(h=qnorm(0.95,mean = s1$estimate[1], sd = s1$estimate[2]),col="red")
 abline(v=30.5,lty=2);text(15,0.185, "PHASE I");text(45,0.185, "PHASE II")
 
-plot(1/sqrt(c(water1[,2],water2[,2])),type="b",
-     ylab=paste0("Logistic(",round(s2$estimate[1],2),",",round(s2$estimate[2],2),") Density" ))
+plot(1/sqrt(c(water1[,2],water2[,2])),type="b", ylab=paste0("1/",expression(sqrt(PO4))) )
+     #ylab=paste0("Logistic(",round(s2$estimate[1],2),",",round(s2$estimate[2],2),") Density" ))
 abline(h=qlogis(0.95,location = s2$estimate[1], scale = s2$estimate[2]),col="red")
 abline(v=30.5,lty=2);text(5,10, "PHASE I");text(35,10, "PHASE II")
 #-----------------------------------------------------------#
