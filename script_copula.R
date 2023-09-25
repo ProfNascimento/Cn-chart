@@ -37,19 +37,18 @@ F1=cowplot::plot_grid(plt1, plt2,labels = c("a.1","a.2"),
 ## PLOT 1/sqrt(PO4)
 df2 <- data.frame(1/sqrt(water1[,2]));colnames(df2)=c("x")
 plt12 = ggplot(df2, aes(x = x)) + 
-  geom_histogram(aes(y = ..density..),bins=7,
+  geom_histogram(aes(y = ..density..),bins=10,
                  colour = 1, fill = "white") +
   geom_density(lwd = 1, colour = "tomato",
                fill = "tomato", alpha = 0.25) + xlab(expression(1/sqrt(PO4))) +
-  theme(axis.title.x = element_text(size = 14),
-        axis.text.x = element_text(size = 14),
-        axis.title.y = element_text(size = 14))
+  xlim(c(1,10)) + theme(axis.title.x = element_text(size = 14),
+    axis.text.x = element_text(size = 14), axis.title.y = element_text(size = 14))
 
 plt22 = ggplot(df2,aes(x="", y = x)) +
   geom_boxplot(fill = "tomato", color = "black") + 
   coord_flip() + ylab("") +
   theme_classic() +
-  xlab("") +
+  xlab("") + ylim(c(1,10)) + 
   theme(axis.text.y=element_blank(),
         axis.ticks.y=element_blank(),
         axis.text.x = element_text(size = 14))
@@ -111,14 +110,16 @@ hist(1/water1[-29,1], breaks=8, xlim=c(0.08,0.2), main="", xaxt = "n", yaxt = "n
 hist(1/sqrt(water1[-29,2]), breaks=6, xlim=c(0, 5), main="", yaxt = "n", xaxt = "n")
 #dev.off()
 
-##
-contour(my_dist, dMvdc, xlim = c(0.08, 0.2), ylim=c(0, 5), main = "",levels=c(1.1) )
+## COPULA TOLERANCE REGION (5%)
+TR=quantile(dMvdc(cbind(1/water1[,1],1/sqrt(water1[,2])), my_dist),0.05)  # Copula Tolerance Region (Phase 1)
+contour(my_dist, dMvdc, xlim = c(0.08, 0.2), ylim=c(0, 6), 
+        main = "",levels=TR )
 points(1/water1[,1],1/sqrt(water1[,2]),pch=16,cex=1.5,col="black")
 points(1/water2[,1],1/sqrt(water2[,2]),pch=16,cex=1.5,col="blue")
 
 # PLOT COPULA DENSITY
 plot(dMvdc(as.matrix(cbind(1/c(water1[,1],water2[,1]),1/sqrt(c(water1[,2],water2[,2])))), 
-           my_dist),type="b",ylab="Copula Density"); abline(h=1,col="red")
+           my_dist),type="b",ylab="Copula Density"); abline(h=TR,col="red")
 abline(v=30.5,lty=2);text(15,20, "PHASE I");text(45,20, "PHASE II")
 
 # PLOT MARGINALS
@@ -168,15 +169,16 @@ persp(my_dist2, dMvdc, ylim = c(0, 0.3), xlim=c(-1.5, 2), main = "Density")
 contour(my_dist2, dMvdc, ylim = c(0, 0.3), xlim=c(-1.5, 2), main = "Contour plot")
 dev.off()
 
+## COPULA TOLERANCE REGION (5%)
 res2=water2[,1]-(fit2_lm$coefficients[1]+fit2_lm$coefficients[2]*water2[,4])
-plot(dMvdc(as.matrix(cbind(c(residuals(fit2_lm),res2),c(water1[,2],water2[,2]) )), my_dist2),type="b",
-     ylab="Copula Density")
-abline(h=1,col="red")
+plot(dMvdc(as.matrix(cbind(c(residuals(fit2_lm),res2),c(water1[,2],water2[,2]) )), my_dist2),
+     type="b", ylab="Copula Density")
+TR2=quantile(dMvdc(cbind(residuals(fit2_lm),water1[,2]), my_dist2),0.05)  # Copula Tolerance Region (Phase 1)
+abline(h=TR2,col="red")
 abline(v=30.5,lty=2);text(15,8, "PHASE I");text(45,8, "PHASE II")
 
-
 ##
-contour(my_dist2, dMvdc, ylim = c(0, 0.27), xlim=c(-1.7, 1.5), main = "",levels=c(1) )
+contour(my_dist2, dMvdc, ylim = c(-0.05, 0.3), xlim=c(-2, 2), main = "", levels=TR2)
 points(residuals(fit2_lm),water1[,2],pch=16,cex=1.5,col="black")
 points(res2,water2[,2],pch=16,cex=1.5,col="blue")
 
@@ -186,6 +188,7 @@ abline(h=qnorm(0.95,mean = s11$estimate[1], sd = s11$estimate[2]),col="red",lty=
 abline(h=qnorm(0.05,mean = s11$estimate[1], sd = s11$estimate[2]),col="red",lty=2)
 abline(v=30.5,lty=2);text(5,1.1, "PHASE I");text(35,1.1, "PHASE II")
 car::qqPlot(c(residuals(fit2_lm),res2))
+
 # MARGINAL OXYGEN (ENDOGENOUS VARIABLE)
 plot(c(water1[,4],water2[,4]),type="b")
 
@@ -194,4 +197,3 @@ plot(c(water1[,2],water2[,2]),type="b",
      ylab=paste0("Logistic(",round(s12$estimate[1],2),",",round(s12$estimate[2],2),") Density" ))
 abline(h=qlogis(0.95,location = s12$estimate[1], scale = s12$estimate[2]),col="red")
 abline(v=30.5,lty=2);text(15,0.255, "PHASE I");text(45,0.255, "PHASE II")
-
